@@ -53,7 +53,7 @@ feeder_relationships = {
 }
 
 # Function to plot objective functions
-def plot_objective_functions(data, schools, title, function_type):
+def plot_objective_functions(data, schools, title, function_type, save_path=None):
     plt.figure(figsize=(12, 8))
     for school, feeders in schools.items():
         # High school data
@@ -92,16 +92,22 @@ def plot_objective_functions(data, schools, title, function_type):
     plt.ylabel('Objective Function')
     plt.legend()
     plt.grid(True)
+
+    if save_path:
+        plt.savefig(save_path)
+    
     plt.show()
 
+
+
 # Plot for maximum objective functions
-plot_objective_functions(data, feeder_relationships, 'Maximum Objective Functions for High Schools and Their Feeder Middle Schools', 'max')
+plot_objective_functions(data, feeder_relationships, 'Maximum Objective Functions for High Schools and Their Feeder Middle Schools', 'max', save_path='plot_max.png')
 
 # Plot for average objective functions
-plot_objective_functions(data, feeder_relationships, 'Average Objective Functions for High Schools and Their Feeder Middle Schools', 'avg')
+plot_objective_functions(data, feeder_relationships, 'Average Objective Functions for High Schools and Their Feeder Middle Schools', 'avg', save_path='plot_avg.png')
 
 # Plot for minimum objective functions
-plot_objective_functions(data, feeder_relationships, 'Minimum Objective Functions for High Schools and Their Feeder Middle Schools', 'min')
+plot_objective_functions(data, feeder_relationships, 'Minimum Objective Functions for High Schools and Their Feeder Middle Schools', 'min', save_path='plot_min.png')
 
 output_path = 'BCPS_Bandmasters_Objective.csv'
 data.to_csv(output_path, index=False)
