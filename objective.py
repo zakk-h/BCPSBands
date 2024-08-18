@@ -29,7 +29,7 @@ data['Grade Level'] = data['Grade Level'].apply(parse_grade_level)
 data[['J1', 'J2', 'J3', 'SR']] = data[['J1', 'J2', 'J3', 'SR']].apply(pd.to_numeric, errors='coerce')
 
 # Calculate the objective function
-data['Objective'] = (250 + (data['Grade Level']**2.75 * (50 - (data['J1']**data['J1']) - (data['J2']**data['J2']) - (data['J3'])**data['J3'])) - (data['SR']**data['SR']))/50
+data['Objective'] = (750 + (data['Grade Level']**2.75 * (50 - (data['J1']**data['J1']) - (data['J2']**data['J2']) - (data['J3'])**data['J3'])) - (data['SR']**data['SR']))/73
 
 # Define high schools and middle schools
 high_schools = ['East Burke High', 'Patton', 'Draughn', 'Freedom']
