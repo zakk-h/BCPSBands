@@ -24,7 +24,7 @@ def parse_grade_level(grade_level):
 
 data['Grade Level'] = data['Grade Level'].apply(parse_grade_level)
 data[['J1', 'J2', 'J3', 'SR']] = data[['J1', 'J2', 'J3', 'SR']].apply(pd.to_numeric, errors='coerce')
-data['Objective'] = 10 + (data['Grade Level']**1.5 * (15 - data['J1'] - data['J2'] - data['J3'])) - data['SR']**2
+data['Objective'] = 10 + (data['Grade Level']**2.8 * (15 - (data['J1']**data['J1']) - (data['J2']**data['J2']) - (data['J3'])**data['J3'])) - (data['SR']**data['SR'])
 
 # Define feeder relationships
 feeder_relationships = {
