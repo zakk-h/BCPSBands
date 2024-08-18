@@ -4,7 +4,7 @@ This project aims to analyze the performance of various high school bands within
 
 ## Objective Function
 
-The objective function is designed to measure band performance, incorporating both the Grade Level (musical difficulty) and the judges' scores. The Grade Level is considered exponential but less so because it can go up to 6 (with 6 being the best). Judges' scores are also exponential, but since a score of 1 is the best (and most bands score between 1 and 2, with rare instances of 3), we divide by 2 in the formula.
+The objective function is designed to measure band performance, incorporating both the Grade Level (musical difficulty) and the judges' scores. The Grade Level is considered exponential treated as exponential but it can go up to 6 (with 6 being the best). Thus, we divide the power by 2 so it never dominates. This maintains intended functionality because grade level is never less than 1. Judges' scores are also exponential, but because a score of 1 is ideal (with most bands scoring between 1 and 2, and a score of 3 being rare), we deliberately avoid dividing by 2. This ensures that a score of 5, which indicates a particularly poor performance, is emphasized and receives the appropriate attention.
 
 $$
 Objective = (Grade Level^{(Grade Level/2)}) \times (50 - (J1^{J1}) - (J2^{J2}) - (J3^{J3}) - (SR^{SR}))
@@ -16,8 +16,8 @@ The relative performance metric compares each high school's performance to the a
 
 ## Handling Missing Data
 
-- **Sightreading (N/A):** Bands that perform at too low of a level to sightread are filled in with a value of 2.2. This value was chosen because a lower value like 0 would artificially improve their score.
-- **Comments Only (C/O):** Performances marked as "Comments Only" are assumed to have not performed well, and are given a value of 2.3.
+- **Sightreading (N/A):** Bands that perform at too low of a level of musical difficulty do not sightread. We opt to fill these in with a value of 2.2. This value was chosen because a lower value like 0 would artificially improve their score because of the subtractive nature of the objective function. 
+- **Comments Only (C/O):** Performances marked as "Comments Only" are assumed to have not performed fabulously, and are given a value of 2.3.
 
 ## Schools and Bands
 
