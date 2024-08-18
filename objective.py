@@ -6,11 +6,12 @@ import matplotlib.pyplot as plt
 data = pd.read_csv('BCPS Bandmasters - Sheet1.csv')
 
 # Define replacement values for N/A and C/O
-na_replacement = 2
-co_replacement = 2
+na_replacement = 2.2
+co_replacement = 2.3
 
-# Replace 'N/A' specifically in the SR column
-data['SR'] = data['SR'].replace('N/A', na_replacement)
+# Replace 'N/A' and '-1' specifically in the SR column
+data['SR'] = data['SR'].replace(['N/A', '-1'], na_replacement)
+data['SR'] = data['SR'].fillna(na_replacement)
 
 # Replace 'C/O' across all columns in the dataframe
 data = data.replace('C/O', co_replacement)
@@ -28,8 +29,21 @@ data['Grade Level'] = data['Grade Level'].apply(parse_grade_level)
 # Convert J1, J2, J3, and SR to numeric
 data[['J1', 'J2', 'J3', 'SR']] = data[['J1', 'J2', 'J3', 'SR']].apply(pd.to_numeric, errors='coerce')
 
+# Function to compute the objective function
+def compute_objective(grade_level, j1, j2, j3, sr):
+    return (grade_level**(grade_level/2)) * (50 - (j1**j1) - (j2**j2) - (j3**j3) - (sr**sr))
+
 # Calculate the objective function
-data['Objective'] = (750 + (data['Grade Level']**2.75 * (50 - (data['J1']**data['J1']) - (data['J2']**data['J2']) - (data['J3'])**data['J3'])) - (data['SR']**data['SR']))/73
+data['Objective'] = compute_objective(
+    data['Grade Level'], data['J1'], data['J2'], data['J3'], data['SR']
+)
+
+# Apply a square root transformation and normalize
+data['Objective'] = np.sqrt(data['Objective'] - data['Objective'].min() + 1)
+min_obj = data['Objective'].min()
+max_obj = data['Objective'].max()
+data['Normalized Objective'] = (data['Objective'] - min_obj) / (max_obj - min_obj) * 100
+data['Normalized Objective'] = (100 + data['Normalized Objective']) / 2
 
 # Define high schools and middle schools
 high_schools = ['East Burke High', 'Patton', 'Draughn', 'Freedom']
@@ -45,15 +59,15 @@ def plot_school_data(df, title):
     fig.suptitle(title)
 
     # Average of entries per year
-    avg_data = df.groupby(['Year', 'School'])['Objective'].mean().unstack().plot(ax=axes[0], marker='o')
-    axes[0].set_title('Average Objective per Year')
-    axes[0].set_ylabel('Average Objective')
+    avg_data = df.groupby(['Year', 'School'])['Normalized Objective'].mean().unstack().plot(ax=axes[0], marker='o')
+    axes[0].set_title('Average Normalized Objective per Year')
+    axes[0].set_ylabel('Average Normalized Objective')
     axes[0].grid(True)
 
     # Maximum of entries per year
-    max_data = df.groupby(['Year', 'School'])['Objective'].max().unstack().plot(ax=axes[1], marker='o')
-    axes[1].set_title('Maximum Objective per Year')
-    axes[1].set_ylabel('Maximum Objective')
+    max_data = df.groupby(['Year', 'School'])['Normalized Objective'].max().unstack().plot(ax=axes[1], marker='o')
+    axes[1].set_title('Maximum Normalized Objective per Year')
+    axes[1].set_ylabel('Maximum Normalized Objective')
     axes[1].grid(True)
 
     # Layout adjustment

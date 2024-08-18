@@ -5,12 +5,13 @@ import matplotlib.pyplot as plt
 # Load data
 data = pd.read_csv('BCPS Bandmasters - Sheet1.csv')
 
-# Define replacement values and replace 'N/A' and 'C/O'
-na_replacement = 2
-co_replacement = 2
+# Define replacement values for N/A and C/O
+na_replacement = 2.2
+co_replacement = 2.3
 
-# Replace 'N/A' specifically in the SR column
-data['SR'] = data['SR'].replace('N/A', na_replacement)
+# Replace 'N/A' and '-1' specifically in the SR column
+data['SR'] = data['SR'].replace(['N/A', '-1'], na_replacement)
+data['SR'] = data['SR'].fillna(na_replacement)
 
 # Replace 'C/O' across all columns in the dataframe
 data = data.replace('C/O', co_replacement)
@@ -25,7 +26,18 @@ def parse_grade_level(grade_level):
 
 data['Grade Level'] = data['Grade Level'].apply(parse_grade_level)
 data[['J1', 'J2', 'J3', 'SR']] = data[['J1', 'J2', 'J3', 'SR']].apply(pd.to_numeric, errors='coerce')
-data['Objective'] = (750 + (data['Grade Level']**2.75 * (50 - (data['J1']**data['J1']) - (data['J2']**data['J2']) - (data['J3'])**data['J3'])) - (data['SR']**data['SR']))/73
+
+# Function to compute the objective function
+def compute_objective(grade_level, j1, j2, j3, sr):
+    return (grade_level**(grade_level/2)) * (50 - (j1**j1) - (j2**j2) - (j3**j3) - (sr**sr))
+
+# Calculate the objective function
+data['Objective'] = compute_objective(
+    data['Grade Level'], data['J1'], data['J2'], data['J3'], data['SR']
+)
+
+# Apply a square root transformation and normalize
+data['Objective'] = np.sqrt(data['Objective'] - data['Objective'].min() + 1)
 
 # Define feeder relationships
 feeder_relationships = {
@@ -35,10 +47,10 @@ feeder_relationships = {
     'Patton': ['Liberty']
 }
 
-# Function to get average objective from middle schools two years prior
+# Function to get average objective from middle schools in the preferred order: 2 years ago, 3 years ago, 1 year ago
 def get_feeder_avg_objective(high_school, year):
     feeder_schools = feeder_relationships.get(high_school, [])
-    previous_years = [year - 2, year - 3, year - 1]  # Preferred order of years
+    previous_years = [year - 2, year - 3, year - 1]  # Preferred order of years: 2, 3, 1
     for yr in previous_years:
         feeder_data = data[(data['School'].isin(feeder_schools)) & (data['Year'] == yr)]
         if not feeder_data.empty:
